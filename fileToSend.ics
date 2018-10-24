@@ -1,0 +1,47 @@
+BEGIN:VCALENDAR
+PRODID:-//Jacob Mischka//iCal Merger//EN
+VERSION:2.0
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART:20181016T170000Z
+DTEND:20181016T180000Z
+LOCATION: Webcast
+TRANSP:OPAQUE
+UID:1551463135201801010T075900Z
+DESCRIPTION:Thank you for registering for Blockchain Governance -  Technolo
+ gy is Not the Issue. \n\nLIVE WEBCAST DATE:  October 16\, 2018 \nLIVE WEBCA
+ ST TIME:  10:00 AM PDT \n\nUse the link below to enter the webcast up to 15
+  minutes before the start. \n\nWEBCAST LINK:  https://event.on24.com/wcc/r/
+ 1846773/6C9A6251D9693B9A7C5C9E97929E856E \nEMAIL:  joelbarenco@gmail.com \n
+ \nThank you and enjoy the webcast!
+SUMMARY:Blockchain Governance -  Technology is Not the Issue
+PRIORITY:5
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+TITLE:Reminder
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20181016T170000Z
+DTEND:20181016T180000Z
+LOCATION: Webcast
+TRANSP:OPAQUE
+UID:1551463135201801010T075900Z
+DESCRIPTION:Thank you for registering for Blockchain Governance -  Technolo
+ gy is Not the Issue. \n\nLIVE WEBCAST DATE:  October 16\, 2018 \nLIVE WEBCA
+ ST TIME:  10:00 AM PDT \n\nUse the link below to enter the webcast up to 15
+  minutes before the start. \n\nWEBCAST LINK:  https://event.on24.com/wcc/r/
+ 1846773/6C9A6251D9693B9A7C5C9E97929E856E \nEMAIL:  joelbarenco@gmail.com \n
+ \nThank you and enjoy the webcast!
+SUMMARY:Blockchain Governance -  Technology is Not the Issue
+PRIORITY:5
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+TITLE:Reminder
+END:VALARM
+END:VEVENT
+END:VCALENDAR
