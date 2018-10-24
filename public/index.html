@@ -9,7 +9,6 @@
   <body>
     <h1>El server de Jojos</h1>
     <p>Let the magic begin!</p>
-    <!-- POST used so data part of req.body -->
     <form method="post" enctype="multipart/form-data">
       <div>
         <label for="file1">Select first ics document:</label>
@@ -50,19 +49,53 @@
         }
         else {
           console.log(".. sending data to the server");
-          for (var i=0; i< formData.getAll('files[]').length;i++) {
-            console.log(".. sending: " + formData.getAll('files[]')[i].name);
-          }
-          fetch(url, {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => {
-              console.log(response);
-              window.open('http://localhost:3000/', '_blank');
-              // TODO: let the user downlaod the response
-          })
-          .catch(err => console.error(err));
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', url, true);
+          xhr.responseType = 'arraybuffer';
+          xhr.onload = function () {
+              if (this.status === 200) {
+                  var filename = "";
+                  var disposition = xhr.getResponseHeader('Content-Disposition');
+                  if (disposition && disposition.indexOf('attachment') !== -1) {
+                      var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                      var matches = filenameRegex.exec(disposition);
+                      if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                  }
+                  var type = xhr.getResponseHeader('Content-Type');
+
+                  var blob = typeof File === 'function'
+                      ? new File([this.response], filename, { type: type })
+                      : new Blob([this.response], { type: type });
+                  if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                      // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                      window.navigator.msSaveBlob(blob, filename);
+                  } else {
+                      var URL = window.URL || window.webkitURL;
+                      var downloadUrl = URL.createObjectURL(blob);
+
+                      if (filename) {
+                          // use HTML5 a[download] attribute to specify filename
+                          var a = document.createElement("a");
+                          // safari doesn't support this yet
+                          if (typeof a.download === 'undefined') {
+                              window.location = downloadUrl;
+                          } else {
+                              a.href = downloadUrl;
+                              a.download = filename;
+                              document.body.appendChild(a);
+                              a.click();
+                          }
+                      } else {
+                          window.location = downloadUrl;
+                      }
+
+                      setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                  }
+              }
+          };
+          xhr.send(formData);
+
         }
       });
     </script>
