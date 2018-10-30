@@ -10,18 +10,18 @@ var ICAL = require('ical.js');
 
 // Parameters of the merged Calendar
 // TODO: check what to use
-let prodid = "-//Jacob Mischka//iCal Merger//EN";
-var version = "2.0"
+let prodid = '-//Jacob Mischka//iCal Merger//EN';
+var version = '2.0'
 
 // Intermediary Step
-exports.merger = function(inputs) {
-
-  // TODO: understand this line
-  if (!Array.isArray(inputs))
+exports.merger = function (inputs) {
+	// TODO: understand this line
+	if (!Array.isArray(inputs)) {
 		inputs = [...arguments];
+	}
 
 	let calendar;
-	for(let input of inputs) {
+	for (let input of inputs) {
 		try {
 			let jcal = ICAL.parse(input);
 			let cal = new ICAL.Component(jcal);
@@ -30,23 +30,21 @@ exports.merger = function(inputs) {
 				calendar = cal;
 				calendar.updatePropertyWithValue('prodid', prodid);
 				calendar.updatePropertyWithValue('version', version);
-			}
-			else {
-				for(let vevent of cal.getAllSubcomponents('vevent')) {
+			} else {
+				for (let vevent of cal.getAllSubcomponents('vevent')) {
 					calendar.addSubcomponent(vevent);
 				}
 			}
-		}
-		catch(e) {
+		} catch (e) {
 			console.error(`Failed to merge: ${e}\nWith input: ${input}\n`);
 		}
 	}
 
 	if (!calendar) {
-		console.error('No icals parsed successfully');
+		console.error('ERR No icals parsed successfully');
 		return;
 	}
 
-  // TODO: confirm format sent by toString()
-  return calendar.toString();
+	// TODO: confirm format sent by toString()
+	return calendar.toString();
 }

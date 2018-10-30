@@ -1,43 +1,90 @@
 var fs = require('fs');
 var express = require('express');
+var multer = require('multer'); // middleware for handling multipart/form-data
+var aggreg = require('../aggregator/aggregator')
+const path = require('path');
+var rp = require('request-promise');
+
 var router = express.Router();
-var multer = require('multer'); //middleware for handling multipart/form-data
-// var upload = multer({ dest: 'uploads/' });
 var storage = multer.memoryStorage()
 var upload = multer({ storage: storage }); // to be changed to the above in future versions
-var aggreg = require('../aggregator/aggregator')
 
-const path = require('path');
+router.post('/', upload.any(), function (req, res, next) {
+	var fileStr = '';
+	// retrieving the files
+	var filesToMerge = [];
+	for (var i = 0; i < req.files.length; i++) {
+    fileStr = req.files[i].buffer.toString();
+		filesToMerge.push(fileStr);
+	}
 
-router.post('/', upload.any(), function(req, res, next) {
-  // retrieving the 2 files
-  console.log(".. retrieving files");
-  var filesToMerge = [req.files[0].buffer.toString(),req.files[1].buffer.toString()];
-  console.log("OK files retrieved");
+	// retrieving  the URLs
+	var url = req.body['url'];
+	fileStr = '';
+	// retrieve the file from the URL
+	asyncForEach(url, async urlStr => {
+		await	rp(urlStr)
+		.then(body => {
+			fileStr = body;
+			// add retrieved files to the array
+			filesToMerge.push(fileStr)
+		})
+		.catch(err => {
+			console.log('Error retrieving the url', err);
+		})
+	})
+	.then(() => {
+		var mergedCal = aggreg.merger(filesToMerge);
 
-  if (req.files === null){
-    new Error("no files transmitted");
-  }
-  console.log(".. merging calendars");
-  var mergedCal = aggreg.merger(filesToMerge);
-  console.log("OK calendars merged");
+		fs.writeFileSync('fileToSend.ics', mergedCal);
 
-  console.log(".. converting calendar to file")
-  fs.writeFileSync('fileToSend.ics', mergedCal);
-  console.log('OK file created');
+		console.log('.. sending back file');
+		res.download(path.join(__dirname, '../fileToSend.ics'), err => {
+			if (err) {
+				console.log('Error sending the file', err);
+				res.end();
+			} else {
+				console.log('OK file sent');
+				// TODO: delete the file once sent: fs.unlink?
+			}
+		});
+	})
+	.catch(err => {
+		console.log('Error retrieving the url', err);
+	});
 
-  console.log(".. sending back file");
-  res.download(path.join(__dirname, "../fileToSend.ics"), err => {
-    if (err) {
-      console.log('Error sending the file', err);
-      res.end();
-    }
-    else {
-      console.log("OK file sent");
-      // TODO: delete the file once sent: fs.unlink?
-    }
-  });
+	// rp(url[0])
+	// .then(body => {
+	// 	fileStr = body;
+	// 	// add retrieved files to the array
+	// 	filesToMerge.push(fileStr);
+	// })
+	// .catch(err => {
+	// 	console.log('Error retrieving the url', err);
+	// })
+	// .finally(() => {
+	// 	var mergedCal = aggreg.merger(filesToMerge);
 
+	// 	fs.writeFileSync('fileToSend.ics', mergedCal);
+
+	// 	console.log('.. sending back file');
+	// 	res.download(path.join(__dirname, '../fileToSend.ics'), err => {
+	// 		if (err) {
+	// 			console.log('Error sending the file', err);
+	// 			res.end();
+	// 		} else {
+	// 			console.log('OK file sent');
+	// 			// TODO: delete the file once sent: fs.unlink?
+	// 		}
+	// 	});
+	// });
 });
 
 module.exports = router;
+
+// defining an async forEach function
+async function asyncForEach (array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array)
+  }
+}
