@@ -11,7 +11,7 @@ var ICAL = require('ical.js');
 // Parameters of the merged Calendar
 // TODO: check what to use
 let prodid = '-//Jacob Mischka//iCal Merger//EN';
-var version = '2.0'
+var version = '2.0';
 
 // Intermediary Step
 exports.merger = function (inputs) {
